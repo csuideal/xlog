@@ -2,8 +2,13 @@
 #include"stdlib.h"
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include<string>
+using namespace std;
 
+extern int v_log();
+#define STR_LOG(l) VLOG(l)
 
+DECLARE_string(vmodule);
 using namespace google;
 int main(int argc,char* argv[])
 {    
@@ -14,7 +19,7 @@ int main(int argc,char* argv[])
 	}
 	
    
-#if 0
+#if 1
 	google::InitGoogleLogging(argv[0]);
 	google::SetLogDestination(google::INFO, "./test.log_");
     google::SetLogDestination(google::WARNING, "./test.log.warn_");
@@ -30,20 +35,22 @@ int main(int argc,char* argv[])
     //FLAGS_colorlogtostderr=true;
     //FLAGS_log_backtrace_at="";
 	//log_backtrace_at
-	FLAGS_alsologtostderr=1;
-	FLAGS_logtostderr=0;
-	FLAGS_max_log_size = 1;
+	FLAGS_alsologtostderr=0;
+	FLAGS_logtostderr=1;
+	FLAGS_max_log_size = 1024*1024*10;
+	FLAGS_vmodule="vlog=3,main=2";
 	//FLAGS_log_prefix=0;
 	int i = 0;
-	while(1)
+	string data(1024,'a');
+	v_log();
+	while(i<2)
     {	
 		i++;
-        LOG(INFO)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
-		VLOG(3)<<"vlog3";
-		VLOG(2)<<"vlog2";
-		VLOG(1)<<"vlog1";
+        //LOG(INFO)<<data;;
 		VLOG(0)<<"vlog0";
-        LOG(WARNING)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
+		VLOG(1)<<"vlog1";
+		VLOG(2)<<"vlog2";
+        //LOG(WARNING)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
 #if 0
         LOG(ERROR)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
         LOG_IF(INFO,i==100)<<"LOG_IF(INFO,i==100)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
@@ -51,7 +58,7 @@ int main(int argc,char* argv[])
         LOG_IF_EVERY_N(WARNING,(i>50),10)<<"LOG_IF_EVERY_N(INFO,(i>50),10)  google::COUNTER="<<google::COUNTER<<"  i="<<i;
         LOG_FIRST_N(ERROR,5)<<"LOG_FIRST_N(INFO,5)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
 #endif 
-		sleep(sleep_time);
+	//	sleep(sleep_time);
     }
     google::ShutdownGoogleLogging();
 }
