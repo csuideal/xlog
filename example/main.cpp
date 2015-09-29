@@ -1,7 +1,7 @@
 #include"eros_log.h"
 #include"stdlib.h"
 #include <glog/logging.h>
-#include <gflags/gflags.h>
+#include "gflags/gflags.h"
 #include<string>
 #include <glog/raw_logging.h>
 using namespace std;
