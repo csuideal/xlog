@@ -179,8 +179,6 @@ uint64_t LogWriter::FileNode()
 	{			
 		node = statbuff.st_ino;
 	}
-	
-	printf("node=%u",node);
 	return node;
 }
 
