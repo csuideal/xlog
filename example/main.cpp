@@ -4,6 +4,7 @@
 #include "gflags/gflags.h"
 #include<string>
 #include <glog/raw_logging.h>
+#include"log.h"
 using namespace std;
 
 extern int v_log();
@@ -28,7 +29,8 @@ int main(int argc,char* argv[])
 #else
 	
 	//eros_log_init(argv[0],"./test");
-	ErosLog log(argv[0],"./log/test");
+	//ErosLog log(argv[0],"./log/test");
+	log_init((LogLevel)1,"test","./log");
 	
 #endif 
 	 //FLAGS_stderrthreshold=google::INFO;
@@ -36,21 +38,22 @@ int main(int argc,char* argv[])
     //FLAGS_log_backtrace_at="";
 	//log_backtrace_at
 	FLAGS_logbufsecs = 5;
-	FLAGS_alsologtostderr=0;
+	FLAGS_alsologtostderr=1;
 	FLAGS_logtostderr=0;
 	FLAGS_max_log_size = 1024*1024*10;
 	FLAGS_v=6;
 	//FLAGS_vmodule="vlog=3,main=2";
-	//FLAGS_log_prefix=0;
+	FLAGS_log_prefix=0;
 	int i = 0;
-	string data(1024,'a');
+	string data(10,'a');
 	//v_log();
-	while(1)
+	while(i<2)
     {	
 		i++;
-        //LOG(INFO)<<data;;
+        LOG(INFO)<<data;;
 		VLOG(0)<<data;	
-		//VLOG(0)<<"vlog0";
+		VLOG(0)<<"vlog0";
+		log_debug("vlog0");
 		//VLOG(1)<<"vlog1";
 		//VLOG(2)<<"vlog2";
 		//SYSLOG(ERROR)<<"syslog-1";

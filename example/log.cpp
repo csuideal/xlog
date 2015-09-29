@@ -257,9 +257,7 @@ void Log_Writer::Write(bool /* should_flush */,
                  time_t /* timestamp */,
                  const char* message,
                  int length){
-                 int _size;
     int prestrlen = 0;
-
     char * star = m_buffer;
     prestrlen = premakestr(star, m_system_level);
     star += prestrlen;
@@ -270,7 +268,7 @@ void Log_Writer::Write(bool /* should_flush */,
 		copy_len =  length;
 	}
     
-    memcpy(m_buffer, message, copy_len);
+    memcpy(star, message, copy_len);
 
     if(NULL == fp){
         fprintf(stderr, "xxxxxxxxxx %d:%s\n", g_pid, m_buffer);
