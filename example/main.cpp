@@ -7,9 +7,15 @@
 #include"log.h"
 using namespace std;
 
+#define MLOG(l) VLOG(l)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define ILOG LOG(INFO)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define WLOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define ELOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+
 extern int v_log();
 #define STR_LOG(l) VLOG(l)
 
+void SplitLogHead(const char* msg, int len, string& ret_data);
 DECLARE_string(vmodule);
 using namespace google;
 int main(int argc,char* argv[])
@@ -43,16 +49,18 @@ int main(int argc,char* argv[])
 	FLAGS_max_log_size = 1024*1024*10;
 	FLAGS_v=6;
 	//FLAGS_vmodule="vlog=3,main=2";
-	FLAGS_log_prefix=0;
+	FLAGS_log_prefix=1;
 	int i = 0;
-	string data(10,'a');
 	//v_log();
-	while(i<2)
+		
+	string data;
+	while(i<3)
     {	
 		i++;
-        LOG(INFO)<<data;;
-		VLOG(0)<<data;	
-		VLOG(0)<<"vlog0";
+        ILOG<<data;;
+		MLOG(0)<<data;	
+		ILOG<<"vlog0";
+		ELOG<<"vlog0";
 		log_debug("vlog0");
 		//VLOG(1)<<"vlog1";
 		//VLOG(2)<<"vlog2";

@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include<math.h>
 #include<stdlib.h>
+#include<string>
+using namespace std;
 
 Log_Writer PUBLIC_W;
 Log_Writer WARN_W;
@@ -263,12 +265,9 @@ void Log_Writer::Write(bool /* should_flush */,
     star += prestrlen;
 
     //glog limit length <=30000  
-    int copy_len = _LOG_BUFFSIZE - prestrlen;
-	if( length < copy_len  ){
-		copy_len =  length;
-	}
-    
+    int copy_len = min(_LOG_BUFFSIZE - prestrlen,length);
     memcpy(star, message, copy_len);
+	
 
     if(NULL == fp){
         fprintf(stderr, "xxxxxxxxxx %d:%s\n", g_pid, m_buffer);
@@ -276,8 +275,4 @@ void Log_Writer::Write(bool /* should_flush */,
         _write(m_buffer, prestrlen + copy_len);
     return;
 }
-
-
-
-
 
