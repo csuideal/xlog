@@ -49,7 +49,6 @@ int main(int argc,char* argv[])
 	FLAGS_max_log_size = 1024*1024*10;
 	FLAGS_v=6;
 	//FLAGS_vmodule="vlog=3,main=2";
-	FLAGS_log_prefix=1;
 	int i = 0;
 	//v_log();
 		

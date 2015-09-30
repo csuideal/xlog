@@ -66,6 +66,7 @@ bool log_init(LogLevel l, const char* p_modulename, const char* p_logdir)
     google::base::SetLogger(google::GLOG_WARNING, &WARN_W);
     google::base::SetLogger(google::GLOG_ERROR, &WARN_W);
     google::base::SetLogger(google::GLOG_FATAL, &WARN_W);
+	FLAGS_log_prefix=0;
     return true;
 }
 
@@ -255,7 +256,7 @@ uint32_t Log_Writer::LogSize()
     return filesize;
 }
 
-void Log_Writer::Write(bool /* should_flush */,
+void Log_Writer::Write(bool  should_flush ,
                  time_t /* timestamp */,
                  const char* message,
                  int length){
@@ -273,6 +274,9 @@ void Log_Writer::Write(bool /* should_flush */,
         fprintf(stderr, "xxxxxxxxxx %d:%s\n", g_pid, m_buffer);
     }else
         _write(m_buffer, prestrlen + copy_len);
+		if( should_flush  ){
+			fflush(fp);
+		}
     return;
 }
 

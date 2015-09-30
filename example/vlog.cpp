@@ -5,8 +5,6 @@
 #include<string>
 using namespace std;
 
-#define STR_LOG(l) VLOG(l)
-
 using namespace google;
 int v_log()
 {    
