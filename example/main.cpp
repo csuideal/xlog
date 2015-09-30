@@ -1,4 +1,3 @@
-#include"eros_log.h"
 #include"stdlib.h"
 #include <glog/logging.h>
 #include "gflags/gflags.h"
@@ -6,11 +5,6 @@
 #include <glog/raw_logging.h>
 #include"log.h"
 using namespace std;
-
-#define MLOG(l) VLOG(l)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
-#define ILOG LOG(INFO)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
-#define WLOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
-#define ELOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
 
 extern int v_log();
 #define STR_LOG(l) VLOG(l)
@@ -33,9 +27,7 @@ int main(int argc,char* argv[])
     google::SetLogDestination(google::WARNING, "./log/test.log.warn_");
     google::SetLogDestination(google::ERROR, "./log/test.log.error_");
 #else
-	
-	//eros_log_init(argv[0],"./test");
-	//ErosLog log(argv[0],"./log/test");
+
 	log_init((LogLevel)1,"test","./log");
 	
 #endif 

@@ -1,4 +1,4 @@
-#include"eros_log.h"
+#include"log.h"
 #include"stdlib.h"
 #include <glog/logging.h>
 #include <gflags/gflags.h>

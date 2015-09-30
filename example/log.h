@@ -6,6 +6,10 @@
 #include "macro_define.h"
 #include <stdint.h>
 
+#define MLOG(l) VLOG(l)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define ILOG LOG(INFO)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define WLOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
+#define ELOG LOG(ERROR)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
 
 
 
