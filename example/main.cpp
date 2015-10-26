@@ -27,7 +27,7 @@ int main(int argc,char* argv[])
     google::SetLogDestination(google::ERROR, "./log/test.log.error_");
 #else
 
-	log_init("test","./log");
+	LogInit("test","./log");
 	
 #endif 
 	 //FLAGS_stderrthreshold=google::INFO;
@@ -38,7 +38,7 @@ int main(int argc,char* argv[])
 	FLAGS_alsologtostderr=1;
 	FLAGS_logtostderr=0;
 	FLAGS_max_log_size = 1024*1024*10;
-	FLAGS_v=6;
+	FLAGS_v=0;
 	//FLAGS_vmodule="vlog=3,main=2";
 	int i = 0;
 	//v_log();
@@ -50,13 +50,12 @@ int main(int argc,char* argv[])
 		i++;
         ILOG<<data;;
 		MLOG(0)<<data;	
+		MLOG(1)<<data;	
 		ILOG<<"vlog0";
 		ELOG<<"vlog0";
 		WLOG<<"vlog0";
 		//VLOG(1)<<"vlog1";
 	//VLOG(2)<<"vlog2";
-		//SYSLOG(ERROR)<<"syslog-1";
-	//	RAW_LOG(INFO,"%s",data.c_str());
         //LOG(WARNING)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
 #if 0
         LOG(ERROR)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;

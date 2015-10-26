@@ -42,7 +42,7 @@ uint64_t GetUid(){
 }
 
 
-bool log_init(const char* p_modulename, const char* p_logdir)
+bool LogInit(const char* p_modulename, const char* p_logdir)
 {
     char _location_str[_LOG_PATH_LEN];  
 
@@ -61,7 +61,7 @@ bool log_init(const char* p_modulename, const char* p_logdir)
     return true;
 }
 
-bool log_close(){
+bool LogClose(){
     google::ShutdownGoogleLogging(); 
     ERROR_W.Destroy();
     WARN_W.Destroy();

@@ -3,7 +3,6 @@
 #include <glog/logging.h>
 #include <stdio.h>
 #include <pthread.h>
-#include "macro_define.h"
 #include <stdint.h>
 
 #define MLOG(l) VLOG(l)<<"["<<__FILE__<<":"<<__LINE__<<"]["<<__FUNCTION__<<"] "
@@ -94,12 +93,6 @@ class LogWriter : public google::base::Logger
 void SetUid(uint64_t log_id = 0);
 uint64_t GetUid();
 
-
-/**
- * LogLevel 日志级别
- * p_modulename 模块名 如mysql
- * p_logdir  日志输出目录
- * */
-bool log_init(const char* p_modulename, const char* p_logdir);
-bool log_close();
+bool LogInit(const char* p_modulename, const char* p_logdir);
+bool LogClose();
 #endif
