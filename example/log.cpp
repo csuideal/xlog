@@ -12,22 +12,20 @@
 #include<math.h>
 #include<stdlib.h>
 #include<string>
+#include <sys/syscall.h>
+#define gettid() syscall(__NR_gettid)
 using namespace std;
 
-Log_Writer PUBLIC_W;
-Log_Writer WARN_W;
-Log_Writer INFO_W;
-__thread char Log_Writer::m_buffer[_LOG_BUFFSIZE];
+LogWriter ERROR_W;
+LogWriter WARN_W;
+LogWriter INFO_W;
+__thread char LogWriter::m_buffer[_LOG_BUFFSIZE];
 static __thread uint64_t g_uuid ;
 static __thread int g_pid = 0;
 
-void set_pid(int pid)
+void SetUid(uint64_t log_id)
 {
-    g_pid = pid;  
-}
-
-void set_uuid(uint64_t log_id)
-{
+	g_pid = gettid();
     if( log_id == 0 ){
         uuid_t src_uid;    
         uuid_generate( src_uid );
@@ -39,78 +37,43 @@ void set_uuid(uint64_t log_id)
     }     
 }
 
-uint64_t get_uuid(){
+uint64_t GetUid(){
     return g_uuid;
 }
 
 
-bool log_init(LogLevel l, const char* p_modulename, const char* p_logdir)
+bool log_init(const char* p_modulename, const char* p_logdir)
 {
     char _location_str[_LOG_PATH_LEN];  
 
-    snprintf(_location_str, _LOG_PATH_LEN, "%s/public.log", p_logdir);    
-    PUBLIC_W.loginit(l, _location_str);
-        
     snprintf(_location_str, _LOG_PATH_LEN, "%s/%s.access", p_logdir, p_modulename);
-    INFO_W.loginit(l, _location_str);
+    INFO_W.Init(_location_str,"INFO");
     
     snprintf(_location_str, _LOG_PATH_LEN, "%s/%s.error", p_logdir, p_modulename);    
-    
-    if(l > LL_WARNING)
-        WARN_W.loginit(l, _location_str);
-    else
-        WARN_W.loginit(LL_WARNING, _location_str);
-
+    WARN_W.Init(_location_str,"WARN");
+    ERROR_W.Init(_location_str,"ERROR");
     google::InitGoogleLogging("");
     google::base::SetLogger(google::GLOG_INFO, &INFO_W);
     google::base::SetLogger(google::GLOG_WARNING, &WARN_W);
-    google::base::SetLogger(google::GLOG_ERROR, &WARN_W);
-    google::base::SetLogger(google::GLOG_FATAL, &WARN_W);
+    google::base::SetLogger(google::GLOG_ERROR, &ERROR_W);
+    google::base::SetLogger(google::GLOG_FATAL, &ERROR_W);
 	FLAGS_log_prefix=0;
     return true;
 }
 
 bool log_close(){
     google::ShutdownGoogleLogging(); 
-    PUBLIC_W.logclose();
-    WARN_W.logclose();
-    INFO_W.logclose();    
+    ERROR_W.Destroy();
+    WARN_W.Destroy();
+    INFO_W.Destroy();    
     return true;
 }
 
-const char* Log_Writer::logLevelToString(LogLevel l) {
-    switch ( l ) {
-        case LL_DEBUG:
-            return "DEBUG";
-        case LL_TRACE:
-            return "TRACE";
-        case LL_NOTICE:
-            return "NOTICE";
-        case LL_WARNING:
-            return "WARN" ;
-        case LL_ERROR:
-            return "ERROR";
-        case LL_PUBLIC:
-            return "PUBLIC";        
-        default:
-            return "UNKNOWN";
-    }
-}
-
-bool Log_Writer::checklevel(LogLevel l)
+bool LogWriter::Init(const  char *filelocation,const char* level, bool append, bool issync)
 {
-    if(l >= m_system_level)
-        return true;
-    else
-        return false;
-}
-
-bool Log_Writer::loginit(LogLevel l, const  char *filelocation, bool append, bool issync)
-{
-    MACRO_RET(NULL != fp, false);
-    m_system_level = l;
     m_isappend = append; 
     m_issync = issync; 
+	m_pre_level= level;
     if(strlen(filelocation) >= (sizeof(m_filelocation) -1))
     {
         fprintf(stderr, "the path of log file is too long:%d limit:%d\n", strlen(filelocation), sizeof(m_filelocation) -1);
@@ -134,7 +97,7 @@ bool Log_Writer::loginit(LogLevel l, const  char *filelocation, bool append, boo
         exit(0);
     }
     
-    m_node = file_node();
+    m_node = FileNode();
     
     //setvbuf (fp, io_cached_buf, _IOLBF, sizeof(io_cached_buf)); //buf set _IONBF  _IOLBF  _IOFBF
     setvbuf (fp,  (char *)NULL, _IOLBF, 0);
@@ -142,7 +105,7 @@ bool Log_Writer::loginit(LogLevel l, const  char *filelocation, bool append, boo
     return true;
 }
 
-int Log_Writer::premakestr(char* m_buffer, LogLevel l)
+int LogWriter::PreMakeStr()
 {
     time_t now;
     now = time(&now);;
@@ -150,20 +113,19 @@ int Log_Writer::premakestr(char* m_buffer, LogLevel l)
     localtime_r(&now, &vtm);
     
     return snprintf(m_buffer, _LOG_BUFFSIZE, "%s: %04d-%02d-%02d %02d:%02d:%02d [%d:%lx]", 
-        logLevelToString(l),
+        m_pre_level.c_str(),
         vtm.tm_year+1900, 
         vtm.tm_mon + 1, vtm.tm_mday, vtm.tm_hour, 
         vtm.tm_min, vtm.tm_sec, g_pid, g_uuid);
 }
 
-bool Log_Writer::log(LogLevel l, const char* logformat,...)
+bool LogWriter::Log( const char* logformat,...)
 {
-    MACRO_RET(!checklevel(l), false);
     int _size;
     int prestrlen = 0;
 
     char * star = m_buffer;
-    prestrlen = premakestr(star, l);
+    prestrlen = PreMakeStr();
     star += prestrlen;
 
     va_list args;
@@ -174,18 +136,18 @@ bool Log_Writer::log(LogLevel l, const char* logformat,...)
     if(NULL == fp){
         fprintf(stderr, "xxxxxxxxxx %d:%s\n", g_pid, m_buffer);
     }else
-        _write(m_buffer, prestrlen + _size);
+        Write(m_buffer, prestrlen + _size);
     return true;
 }
 
-bool Log_Writer::_write(char *_pbuffer, int len)
+bool LogWriter::Write(char *_pbuffer, int len)
 {
-    if( m_node != file_node() || !m_node ){
+    if( m_node != FileNode() || !m_node ){
         m_lock.WLock();		
-		if( m_node != file_node() || !m_node ){
+		if( m_node != FileNode() || !m_node ){
             fprintf(stderr, "xxxxxxxxxx %d:log reinit init file %s\n", g_pid, m_filelocation);
-			logclose();
-            loginit(m_system_level, m_filelocation, m_isappend, m_issync);
+			Destroy();
+            Init(m_filelocation,m_pre_level.c_str(), m_isappend, m_issync);
 		}
         m_lock.UnLock();
 	}
@@ -207,12 +169,7 @@ bool Log_Writer::_write(char *_pbuffer, int len)
     return true;
 }
 
-LogLevel Log_Writer::get_level()
-{
-    return m_system_level; 
-}
-
-bool Log_Writer::logclose()
+bool LogWriter::Destroy()
 {
     if(fp == NULL)
         return false;
@@ -223,7 +180,7 @@ bool Log_Writer::logclose()
     return true;
 }
 
-uint64_t Log_Writer::file_node()
+uint64_t LogWriter::FileNode()
 {	
 	uint64_t node = 0;
 	struct stat statbuff;	
@@ -235,7 +192,7 @@ uint64_t Log_Writer::file_node()
 	return node;
 }
 
-void Log_Writer::Flush()
+void LogWriter::Flush()
 {
     if( fp  )
     {   
@@ -243,7 +200,7 @@ void Log_Writer::Flush()
     }   
 }
 
-uint32_t Log_Writer::LogSize()
+uint32_t LogWriter::LogSize()
 {
     m_lock.RLock();
     unsigned long filesize = 0;
@@ -256,13 +213,13 @@ uint32_t Log_Writer::LogSize()
     return filesize;
 }
 
-void Log_Writer::Write(bool  should_flush ,
+void LogWriter::Write(bool  should_flush ,
                  time_t /* timestamp */,
                  const char* message,
                  int length){
     int prestrlen = 0;
     char * star = m_buffer;
-    prestrlen = premakestr(star, m_system_level);
+    prestrlen = PreMakeStr();
     star += prestrlen;
 
     //glog limit length <=30000  
@@ -273,7 +230,7 @@ void Log_Writer::Write(bool  should_flush ,
     if(NULL == fp){
         fprintf(stderr, "xxxxxxxxxx %d:%s\n", g_pid, m_buffer);
     }else
-        _write(m_buffer, prestrlen + copy_len);
+        Write(m_buffer, prestrlen + copy_len);
 		if( should_flush  ){
 			fflush(fp);
 		}

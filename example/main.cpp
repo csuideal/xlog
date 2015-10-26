@@ -7,7 +7,6 @@
 using namespace std;
 
 extern int v_log();
-#define STR_LOG(l) VLOG(l)
 
 void SplitLogHead(const char* msg, int len, string& ret_data);
 DECLARE_string(vmodule);
@@ -28,7 +27,7 @@ int main(int argc,char* argv[])
     google::SetLogDestination(google::ERROR, "./log/test.log.error_");
 #else
 
-	log_init((LogLevel)1,"test","./log");
+	log_init("test","./log");
 	
 #endif 
 	 //FLAGS_stderrthreshold=google::INFO;
@@ -44,6 +43,7 @@ int main(int argc,char* argv[])
 	int i = 0;
 	//v_log();
 		
+	SetUid();
 	string data;
 	while(i<3)
     {	
@@ -52,9 +52,9 @@ int main(int argc,char* argv[])
 		MLOG(0)<<data;	
 		ILOG<<"vlog0";
 		ELOG<<"vlog0";
-		log_debug("vlog0");
+		WLOG<<"vlog0";
 		//VLOG(1)<<"vlog1";
-		//VLOG(2)<<"vlog2";
+	//VLOG(2)<<"vlog2";
 		//SYSLOG(ERROR)<<"syslog-1";
 	//	RAW_LOG(INFO,"%s",data.c_str());
         //LOG(WARNING)<<"LOG_IF(INFO,i=true)  google::COUNTER="<<google::COUNTER<<"  i="<<i<<"sleep:"<<sleep_time;
